@@ -11,7 +11,6 @@ export class LexicalAnalyzer //fileIO новый объект (строка пр
         this.fileIO = fileIO;
         this.char = ' ';
         this.currentWord = '';
-        this.formerChar = null; // добавляем свойство предыдущий символ
     }
 
     nextSym()
@@ -45,10 +44,6 @@ export class LexicalAnalyzer //fileIO новый объект (строка пр
         if (/\d/.exec(this.char) !== null) {
 
             while (/[\d.]/.exec(this.char) !== null) {
-                if(this.formerChar !== null){
-                    this.currentWord += SymbolsCodes.minus;
-                    this.formerChar = null;
-                }
                 this.currentWord += this.char;
                 this.char = this.fileIO.nextCh();
             }
@@ -71,42 +66,19 @@ export class LexicalAnalyzer //fileIO новый объект (строка пр
 
             switch (this.char) {
                 case '-':
-                    if(this.fileIO.charPointer == 1){
-                        this.formerChar = SymbolsCodes.minus;
-                        this.char = this.fileIO.nextCh();
-                        return this.scanSymbol();
-                    }
-                    else if(this.formerChar !== null){
-                        this.char = this.fileIO.nextCh();
-                        return this.scanSymbol();
-                    }
-                    else{
-                        this.char = this.fileIO.nextCh();
-                        return this.getSymbol(SymbolsCodes.minus);
-                    }
+                    this.char = this.fileIO.nextCh();
+                    return this.getSymbol(SymbolsCodes.minus);
 
                 case '+':
-                    this.formerChar = this.char;
                     this.char = this.fileIO.nextCh();
-                    if(/\d/.exec(this.char) !== null){
-                        this.formerChar = null;
-                    }
                     return this.getSymbol(SymbolsCodes.plus);
 
                 case '*':
-                    this.formerChar = this.char;
                     this.char = this.fileIO.nextCh();
-                    if(/\d/.exec(this.char) !== null){
-                        this.formerChar = null;
-                    }
                     return this.getSymbol(SymbolsCodes.star);
 
                 case '/':
-                    this.formerChar = this.char;
                     this.char = this.fileIO.nextCh();
-                    if(/\d/.exec(this.char) !== null){
-                        this.formerChar = null;
-                    }
                     return this.getSymbol(SymbolsCodes.slash);
 
                 case '=':

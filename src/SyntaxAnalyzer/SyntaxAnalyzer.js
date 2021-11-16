@@ -5,6 +5,7 @@ import { Subtraction } from './Tree/Subtraction';
 import { NumberConstant } from './Tree/NumberConstant';
 import { SymbolsCodes } from '../LexicalAnalyzer/SymbolsCodes';
 import { Symbol } from '../LexicalAnalyzer/Symbols/Symbol';
+import { IntegerConstant } from '../LexicalAnalyzer/Symbols/IntegerConstant';
 
 /**
  * Синтаксический анализатор - отвечат за построения дерева выполнения
@@ -24,14 +25,14 @@ export class SyntaxAnalyzer
         this.symbol = this.lexicalAnalyzer.nextSym();
     }
 
-    accept(expectedSymbolCode)
-    {
-        if (this.symbol.symbolCode === expectedSymbolCode) {
-            this.nextSym();
-        } else {
-            throw `${expectedSymbolCode} expected but ${this.symbol.symbolCode} found!`;
-        }
-    }
+    // accept(expectedSymbolCode)
+    // {
+    //     if (this.symbol.symbolCode === expectedSymbolCode) {
+    //         this.nextSym();
+    //     } else {
+    //         throw `${expectedSymbolCode} expected but ${this.symbol.symbolCode} found!`;
+    //     }
+    // }
 
     analyze()
     {
@@ -63,7 +64,6 @@ export class SyntaxAnalyzer
 
             operationSymbol = this.symbol;
             this.nextSym();
-    
 
             switch (operationSymbol.symbolCode) {
                 case SymbolsCodes.plus:
@@ -121,11 +121,19 @@ export class SyntaxAnalyzer
     }
     // Разбор множителя
     scanMultiplier()
-    {
-        let integerConstant = this.symbol;
-
-        this.accept(SymbolsCodes.integerConst);
-
-        return new NumberConstant(integerConstant);
+    {   
+        if(this.symbol instanceof IntegerConstant){
+            let integerConstant = this.symbol;
+            this.nextSym();
+            return new NumberConstant(integerConstant);
+        } else if(this.symbol.symbolCode === SymbolsCodes.minus){
+            this.nextSym();
+            this.symbol.value = -this.symbol.value;
+            let integerConstant = this.symbol;
+            this.nextSym();
+            return new NumberConstant(integerConstant);
+        } else{
+            throw `${expectedSymbolCode} expected but ${this.symbol.symbolCode} found!`;
+        }
     }
 };

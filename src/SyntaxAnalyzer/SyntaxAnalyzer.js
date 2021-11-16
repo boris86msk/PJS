@@ -4,6 +4,7 @@ import { Addition } from './Tree/Addition';
 import { Subtraction } from './Tree/Subtraction';
 import { NumberConstant } from './Tree/NumberConstant';
 import { SymbolsCodes } from '../LexicalAnalyzer/SymbolsCodes';
+import { Symbol } from '../LexicalAnalyzer/Symbols/Symbol';
 
 /**
  * Синтаксический анализатор - отвечат за построения дерева выполнения
@@ -13,7 +14,6 @@ export class SyntaxAnalyzer
     constructor(lexicalAnalyzer)
     {
         this.lexicalAnalyzer = lexicalAnalyzer;
-        this.formerSim = null; // добавляем свойство предыдущий символ
         this.symbol = null;
         this.tree = null;
         this.trees = [];
@@ -63,14 +63,31 @@ export class SyntaxAnalyzer
 
             operationSymbol = this.symbol;
             this.nextSym();
+    
 
             switch (operationSymbol.symbolCode) {
                 case SymbolsCodes.plus:
-                    term = new Addition(operationSymbol, term, this.scanTerm());
-                    break;
+                    if(this.symbol.symbolCode === SymbolsCodes.minus){
+                        operationSymbol = this.symbol;
+                        this.nextSym();
+                        term = new Subtraction(operationSymbol, term, this.scanTerm());
+                        break;
+                    }
+                    else{
+                        term = new Addition(operationSymbol, term, this.scanTerm());
+                        break;
+                    }
                 case SymbolsCodes.minus:
-                    term = new Subtraction(operationSymbol, term, this.scanTerm());
-                    break;
+                    if(this.symbol.symbolCode === SymbolsCodes.minus){
+                        operationSymbol = new Symbol(SymbolsCodes.plus, '+');
+                        this.nextSym();
+                        term = new Addition(operationSymbol, term, this.scanTerm());
+                        break;
+                    }
+                    else{
+                        term = new Subtraction(operationSymbol, term, this.scanTerm());
+                        break;
+                    }
             }
         }
 

@@ -108,23 +108,16 @@ export class SyntaxAnalyzer
     {
         if(this.symbol.symbolCode === SymbolsCodes.minus){
             this.nextSym();
-            if(this.symbol !== SymbolsCodes.openStap){ //минус перед числом
+            if(this.symbol.symbolCode !== SymbolsCodes.openStap){ //минус перед числом
                 let integerConstant = this.symbol;
                 this.accept(SymbolsCodes.integerConst);
                 return new UnarOperation(SymbolsCodes.minus, new NumberConstant(integerConstant))
             } else{                                  //минус перед скобкой
-                this.nextSym();
-                
+                return new UnarOperation(SymbolsCodes.minus, this.StaplesResult());  
             }
 
         } else if(this.symbol.symbolCode === SymbolsCodes.openStap){
-            this.nextSym();
-            let prom = this.scanExpression();
-            let engine = new Engine(prom);
-            let val = engine.evaluateSimpleExpression(prom);
-            let int = new IntegerConstant(SymbolsCodes.integerConst, val.value);
-            this.nextSym();
-            return new NumberConstant(int);
+            this.StaplesResult();
 
         } else{
             let integerConstant = this.symbol;
@@ -134,5 +127,16 @@ export class SyntaxAnalyzer
             return new NumberConstant(integerConstant);
         }
 
+    }
+
+    StaplesResult()
+    {
+        this.nextSym();
+        let prom = this.scanExpression();
+        let engine = new Engine(prom);
+        let val = engine.evaluateSimpleExpression(prom);
+        let int = new IntegerConstant(SymbolsCodes.integerConst, val.value);
+        this.nextSym();
+        return new NumberConstant(int);
     }
 }

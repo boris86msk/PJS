@@ -54,7 +54,7 @@ export class Engine
 
             return new NumberVariable(result);
 
-        } else if(expression instanceof UnarOperation){
+        } else if (expression instanceof UnarOperation){
             let rightOperand = this.evaluateSimpleExpression(expression.right);
             let result = null;
             result = 0 - rightOperand.value;
@@ -79,6 +79,12 @@ export class Engine
             let leftOperand = this.evaluateTerm(expression.left);
             let rightOperand = this.evaluateTerm(expression.right);
             let result = leftOperand.value / rightOperand.value;
+
+            return new NumberVariable(result);
+        } else if (expression instanceof UnarOperation){
+            let rightOperand = this.evaluateTerm(expression.right);
+            let result = null;
+            result = -1 * rightOperand.value;
 
             return new NumberVariable(result);
         } else {

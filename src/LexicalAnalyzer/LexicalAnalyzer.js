@@ -85,6 +85,14 @@ export class LexicalAnalyzer //fileIO новый объект (строка пр
                     this.char = this.fileIO.nextCh();
                     return this.getSymbol(SymbolsCodes.equal);
 
+                case '(':
+                    this.char = this.fileIO.nextCh();
+                    return this.getSymbol(SymbolsCodes.openStap);
+
+                case ')':
+                    this.char = this.fileIO.nextCh();
+                    return this.getSymbol(SymbolsCodes.closeStap);    
+
             }
         }
         throw `Inadmissible symbol:${this.char}.`;

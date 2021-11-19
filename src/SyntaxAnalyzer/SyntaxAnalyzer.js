@@ -4,9 +4,9 @@ import { Addition } from './Tree/Addition';
 import { Subtraction } from './Tree/Subtraction';
 import { NumberConstant } from './Tree/NumberConstant';
 import { SymbolsCodes } from '../LexicalAnalyzer/SymbolsCodes';
-import { Symbol } from '../LexicalAnalyzer/Symbols/Symbol';
+import { UnarOperation } from './Tree/UnarOperation';
+import { Engine } from '../Semantics/Engine';
 import { IntegerConstant } from '../LexicalAnalyzer/Symbols/IntegerConstant';
-
 /**
  * Синтаксический анализатор - отвечат за построения дерева выполнения
  */
@@ -25,14 +25,14 @@ export class SyntaxAnalyzer
         this.symbol = this.lexicalAnalyzer.nextSym();
     }
 
-    // accept(expectedSymbolCode)
-    // {
-    //     if (this.symbol.symbolCode === expectedSymbolCode) {
-    //         this.nextSym();
-    //     } else {
-    //         throw `${expectedSymbolCode} expected but ${this.symbol.symbolCode} found!`;
-    //     }
-    // }
+    accept(expectedSymbolCode)
+    {
+        if (this.symbol.symbolCode === expectedSymbolCode) {
+            this.nextSym();
+        } else {
+            throw `${expectedSymbolCode} expected but ${this.symbol.symbolCode} found!`;
+        }
+    }
 
     analyze()
     {
@@ -67,27 +67,11 @@ export class SyntaxAnalyzer
 
             switch (operationSymbol.symbolCode) {
                 case SymbolsCodes.plus:
-                    if(this.symbol.symbolCode === SymbolsCodes.minus){
-                        operationSymbol = this.symbol;
-                        this.nextSym();
-                        term = new Subtraction(operationSymbol, term, this.scanTerm());
-                        break;
-                    }
-                    else{
-                        term = new Addition(operationSymbol, term, this.scanTerm());
-                        break;
-                    }
+                    term = new Addition(operationSymbol, term, this.scanTerm());
+                    break;
                 case SymbolsCodes.minus:
-                    if(this.symbol.symbolCode === SymbolsCodes.minus){
-                        operationSymbol = new Symbol(SymbolsCodes.plus, '+');
-                        this.nextSym();
-                        term = new Addition(operationSymbol, term, this.scanTerm());
-                        break;
-                    }
-                    else{
-                        term = new Subtraction(operationSymbol, term, this.scanTerm());
-                        break;
-                    }
+                    term = new Subtraction(operationSymbol, term, this.scanTerm());
+                    break;
             }
         }
 
@@ -121,19 +105,34 @@ export class SyntaxAnalyzer
     }
     // Разбор множителя
     scanMultiplier()
-    {   
-        if(this.symbol instanceof IntegerConstant){
-            let integerConstant = this.symbol;
+    {
+        if(this.symbol.symbolCode === SymbolsCodes.minus){
             this.nextSym();
-            return new NumberConstant(integerConstant);
-        } else if(this.symbol.symbolCode === SymbolsCodes.minus){
+            if(this.symbol !== SymbolsCodes.openStap){ //минус перед числом
+                let integerConstant = this.symbol;
+                this.accept(SymbolsCodes.integerConst);
+                return new UnarOperation(SymbolsCodes.minus, new NumberConstant(integerConstant))
+            } else{                                  //минус перед скобкой
+                this.nextSym();
+                
+            }
+
+        } else if(this.symbol.symbolCode === SymbolsCodes.openStap){
             this.nextSym();
-            this.symbol.value = -this.symbol.value;
-            let integerConstant = this.symbol;
+            let prom = this.scanExpression();
+            let engine = new Engine(prom);
+            let val = engine.evaluateSimpleExpression(prom);
+            let int = new IntegerConstant(SymbolsCodes.integerConst, val.value);
             this.nextSym();
-            return new NumberConstant(integerConstant);
+            return new NumberConstant(int);
+
         } else{
-            throw `${expectedSymbolCode} expected but ${this.symbol.symbolCode} found!`;
+            let integerConstant = this.symbol;
+
+            this.accept(SymbolsCodes.integerConst);
+
+            return new NumberConstant(integerConstant);
         }
+
     }
-};
+}

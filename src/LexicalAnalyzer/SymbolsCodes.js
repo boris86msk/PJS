@@ -3,6 +3,8 @@ export const SymbolsCodes = {
     minus: '-',
     star: '*',
     slash: '/',
+    openStap: '(',
+    closeStap: ')',
     identifier: 'ident',
     integerConst: 'int',
     endOfLine: 'eol',

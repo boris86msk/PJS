@@ -117,7 +117,7 @@ export class SyntaxAnalyzer
             }
 
         } else if(this.symbol.symbolCode === SymbolsCodes.openStap){
-            this.StaplesResult();
+            return this.StaplesResult();
 
         } else{
             let integerConstant = this.symbol;

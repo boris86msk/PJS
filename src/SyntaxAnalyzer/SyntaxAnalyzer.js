@@ -51,7 +51,7 @@ export class SyntaxAnalyzer
 
         return this.tree;
     }
-    // Разбор выражения
+    
     scanExpression()
     {
         let term = this.scanTerm();
@@ -77,7 +77,7 @@ export class SyntaxAnalyzer
 
         return term;
     }
-    // Разбор слагаемого
+    
     scanTerm()
     {
         let term = this.scanMultiplier();
@@ -103,7 +103,7 @@ export class SyntaxAnalyzer
 
         return term;
     }
-    // Разбор множителя
+    
     scanMultiplier()
     {
         if(this.symbol.symbolCode === SymbolsCodes.minus){

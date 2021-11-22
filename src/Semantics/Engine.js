@@ -54,13 +54,6 @@ export class Engine
 
             return new NumberVariable(result);
 
-        } else if (expression instanceof UnarOperation){
-            let rightOperand = this.evaluateSimpleExpression(expression.right);
-            let result = null;
-            result = 0 - rightOperand.value;
-
-            return new NumberVariable(result);
-
         } else {
             return this.evaluateTerm(expression);
         }
@@ -71,7 +64,6 @@ export class Engine
         if (expression instanceof Multiplication) {
             let leftOperand = this.evaluateTerm(expression.left);
             let rightOperand = this.evaluateTerm(expression.right);
-
             let result = leftOperand.value * rightOperand.value;
 
             return new NumberVariable(result);
@@ -79,12 +71,6 @@ export class Engine
             let leftOperand = this.evaluateTerm(expression.left);
             let rightOperand = this.evaluateTerm(expression.right);
             let result = leftOperand.value / rightOperand.value;
-
-            return new NumberVariable(result);
-        } else if (expression instanceof UnarOperation){
-            let rightOperand = this.evaluateTerm(expression.right);
-            let result = null;
-            result = -1 * rightOperand.value;
 
             return new NumberVariable(result);
         } else {
@@ -95,8 +81,13 @@ export class Engine
     evaluateMultiplier(expression)
     {
         if (expression instanceof NumberConstant) {
+
             return new NumberVariable(expression.symbol.value);
-        } else {
+        } else if(expression instanceof UnarOperation){
+            let result = expression.right.symbol.value;
+
+            return new NumberVariable(-1 * result);
+        } else{
             throw 'Number Constant expected.';
         }
     }

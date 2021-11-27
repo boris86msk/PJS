@@ -2,9 +2,10 @@ import { Addition } from '../SyntaxAnalyzer/Tree/Addition';
 import { Multiplication } from '../SyntaxAnalyzer/Tree/Multiplication';
 import { Subtraction } from '../SyntaxAnalyzer/Tree/Subtraction';
 import { Division } from '../SyntaxAnalyzer/Tree/Division';
-import { UnarOperation } from '../SyntaxAnalyzer/Tree/UnarOperation';
+import { UnaryOperation } from '../SyntaxAnalyzer/Tree/UnaryOperation';
 import { NumberConstant } from '../SyntaxAnalyzer/Tree/NumberConstant';
 import { NumberVariable } from './Variables/NumberVariable';
+import { Parentheses } from '../SyntaxAnalyzer/Tree/Parentheses';
 
 export class Engine
 {
@@ -74,19 +75,38 @@ export class Engine
 
             return new NumberVariable(result);
         } else {
+            return this.expressionInParentheses(expression);
+        }
+    }
+
+    expressionInParentheses(expression)
+    {
+        if (expression instanceof Parentheses){
+            let result = this.evaluateSimpleExpression(expression.expression);
+
+            return result;
+        } else{
             return this.evaluateMultiplier(expression);
         }
+
     }
 
     evaluateMultiplier(expression)
     {
-        if (expression instanceof NumberConstant) {
-
+        if (expression instanceof NumberConstant) 
+        {
             return new NumberVariable(expression.symbol.value);
-        } else if(expression instanceof UnarOperation){
+        } else if (expression instanceof UnaryOperation)
+        {   if (expression.right instanceof Parentheses)
+            {
+                let result = this.expressionInParentheses(expression.right);
+                result.value = -result.value;
+                return result;
+            } else{
             let result = expression.right.symbol.value;
 
             return new NumberVariable(-1 * result);
+            }
         } else{
             throw 'Number Constant expected.';
         }

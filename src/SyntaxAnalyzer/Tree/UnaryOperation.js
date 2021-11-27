@@ -1,6 +1,6 @@
 import { TreeNodeBase } from './TreeNodeBase';
 
-export class UnarOperation extends TreeNodeBase
+export class UnaryOperation extends TreeNodeBase
 {
     constructor(symbol, right)
     {

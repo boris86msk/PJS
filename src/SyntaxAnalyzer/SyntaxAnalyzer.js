@@ -5,7 +5,6 @@ import { Subtraction } from './Tree/Subtraction';
 import { NumberConstant } from './Tree/NumberConstant';
 import { SymbolsCodes } from '../LexicalAnalyzer/SymbolsCodes';
 import { UnaryOperation } from './Tree/UnaryOperation';
-import { Parentheses } from './Tree/Parentheses';
 /**
  * Синтаксический анализатор - отвечат за построения дерева выполнения
  */
@@ -79,7 +78,7 @@ export class SyntaxAnalyzer
     
     scanTerm()
     {
-        let term = this.scanParentheses();
+        let term = this.scanMultiplier();
         let operationSymbol = null;
 
         while ( this.symbol !== null && (
@@ -92,33 +91,21 @@ export class SyntaxAnalyzer
 
             switch (operationSymbol.symbolCode) {
                 case SymbolsCodes.star:
-                    term = new Multiplication(operationSymbol, term, this.scanParentheses());
+                    term = new Multiplication(operationSymbol, term, this.scanMultiplier());
                     break;
                 case SymbolsCodes.slash:
-                    term = new Division(operationSymbol, term, this.scanParentheses());
+                    term = new Division(operationSymbol, term, this.scanMultiplier());
                     break;
             }
         }
 
         return term;
     }
-
-    scanParentheses(){
-        if ( this.symbol !== null &&
-            this.symbol.symbolCode === SymbolsCodes.openStap)
-        {
-            this.nextSym();
-            let term = this.scanExpression();
-            this.nextSym();
-            return new Parentheses(term);
-        } else{
-            return this.scanMultiplier();
-        }
-    }
     
     scanMultiplier()
     {
-        if(this.symbol.symbolCode === SymbolsCodes.minus){
+        if(this.symbol.symbolCode === SymbolsCodes.minus)
+        {
             this.nextSym();
             if(this.symbol.symbolCode !== SymbolsCodes.openStap){ //унарный "-" перед числом
                 let integerConstant = this.symbol;
@@ -128,12 +115,10 @@ export class SyntaxAnalyzer
                 return new UnaryOperation(SymbolsCodes.minus, this.scanParentheses());  
             }
 
-        } else if(this.symbol.symbolCode === SymbolsCodes.openStap){
-
-            
-        } else if(this.symbol.symbolCode === SymbolsCodes.closeStap){
-
-            return new Parentheses();
+        } else if(this.symbol.symbolCode === SymbolsCodes.openStap)
+        {
+            let term = this.scanParentheses();
+            return term;
         } else{
             let integerConstant = this.symbol;
 
@@ -142,6 +127,15 @@ export class SyntaxAnalyzer
             return new NumberConstant(integerConstant);
         }
 
+    }
+    
+
+    scanParentheses()
+    {
+        this.nextSym();
+        let term = this.scanExpression();
+        this.nextSym();
+        return term;
     }
 
 }

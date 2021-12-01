@@ -5,7 +5,6 @@ import { Division } from '../SyntaxAnalyzer/Tree/Division';
 import { UnaryOperation } from '../SyntaxAnalyzer/Tree/UnaryOperation';
 import { NumberConstant } from '../SyntaxAnalyzer/Tree/NumberConstant';
 import { NumberVariable } from './Variables/NumberVariable';
-import { Parentheses } from '../SyntaxAnalyzer/Tree/Parentheses';
 
 export class Engine
 {
@@ -63,32 +62,20 @@ export class Engine
     evaluateTerm(expression)
     {
         if (expression instanceof Multiplication) {
-            let leftOperand = this.evaluateTerm(expression.left);
-            let rightOperand = this.evaluateTerm(expression.right);
+            let leftOperand = this.evaluateSimpleExpression(expression.left);
+            let rightOperand = this.evaluateSimpleExpression(expression.right);
             let result = leftOperand.value * rightOperand.value;
 
             return new NumberVariable(result);
         } else if (expression instanceof Division) {
-            let leftOperand = this.evaluateTerm(expression.left);
-            let rightOperand = this.evaluateTerm(expression.right);
+            let leftOperand = this.evaluateSimpleExpression(expression.left);
+            let rightOperand = this.evaluateSimpleExpression(expression.right);
             let result = leftOperand.value / rightOperand.value;
 
             return new NumberVariable(result);
         } else {
-            return this.expressionInParentheses(expression);
-        }
-    }
-
-    expressionInParentheses(expression)
-    {
-        if (expression instanceof Parentheses){
-            let result = this.evaluateSimpleExpression(expression.expression);
-
-            return result;
-        } else{
             return this.evaluateMultiplier(expression);
         }
-
     }
 
     evaluateMultiplier(expression)
@@ -97,18 +84,18 @@ export class Engine
         {
             return new NumberVariable(expression.symbol.value);
         } else if (expression instanceof UnaryOperation)
-        {   if (expression.right instanceof Parentheses)
+        {   
+            if (expression.right instanceof NumberConstant)
             {
-                let result = this.expressionInParentheses(expression.right);
-                result.value = -result.value;
-                return result;
+                let result = expression.right.symbol.value;
+                return new NumberVariable(-result);
             } else{
-            let result = expression.right.symbol.value;
-
-            return new NumberVariable(-1 * result);
+                let result = this.evaluateSimpleExpression(expression.right);
+                return new NumberVariable(-result.value);
             }
         } else{
             throw 'Number Constant expected.';
         }
     }
-};
+
+}

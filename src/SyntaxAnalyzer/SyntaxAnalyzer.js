@@ -107,19 +107,22 @@ export class SyntaxAnalyzer
         if(this.symbol.symbolCode === SymbolsCodes.minus)
         {
             this.nextSym();
-            if(this.symbol.symbolCode !== SymbolsCodes.openStap){ //унарный "-" перед числом
+            let element = null;
+            if (this.symbol.symbolCode == SymbolsCodes.openStap)
+            {
+                element = this.scanParentheses();
+            } else if (this.symbol.symbolCode == SymbolsCodes.integerConst) {
                 let integerConstant = this.symbol;
                 this.accept(SymbolsCodes.integerConst);
-                return new UnaryOperation(SymbolsCodes.minus, new NumberConstant(integerConstant))
-            } else{                                  //унарный "-" перед скобкой
-                return new UnaryOperation(SymbolsCodes.minus, this.scanParentheses());  
-            }
+                element = new NumberConstant(integerConstant);
+            } 
+            return new UnaryOperation(SymbolsCodes.minus, element);
 
-        } else if(this.symbol.symbolCode === SymbolsCodes.openStap)
+        } else if (this.symbol.symbolCode === SymbolsCodes.openStap)
         {
             let term = this.scanParentheses();
             return term;
-        } else{
+        } else {
             let integerConstant = this.symbol;
 
             this.accept(SymbolsCodes.integerConst);

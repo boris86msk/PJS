@@ -1,4 +1,5 @@
 import { Addition } from '../SyntaxAnalyzer/Tree/Addition';
+import { BinaryOperation } from '../SyntaxAnalyzer/Tree/BinaryOperation';
 import { Multiplication } from '../SyntaxAnalyzer/Tree/Multiplication';
 import { Subtraction } from '../SyntaxAnalyzer/Tree/Subtraction';
 import { Division } from '../SyntaxAnalyzer/Tree/Division';
@@ -62,17 +63,35 @@ export class Engine
     evaluateTerm(expression)
     {
         if (expression instanceof Multiplication) {
-            let leftOperand = this.evaluateSimpleExpression(expression.left);
-            let rightOperand = this.evaluateSimpleExpression(expression.right);
+            let leftOperand = this.evaluateTerm(expression.left);
+            let rightOperand = this.evaluateTerm(expression.right);
             let result = leftOperand.value * rightOperand.value;
 
             return new NumberVariable(result);
         } else if (expression instanceof Division) {
-            let leftOperand = this.evaluateSimpleExpression(expression.left);
-            let rightOperand = this.evaluateSimpleExpression(expression.right);
+            let leftOperand = this.evaluateTerm(expression.left);
+            let rightOperand = this.evaluateTerm(expression.right);
             let result = leftOperand.value / rightOperand.value;
 
             return new NumberVariable(result);
+        } else {
+            return this.evaluateExpression(expression);
+        }
+    }
+
+    evaluateExpression(expression)
+    {
+        if (expression instanceof UnaryOperation)
+        {
+            let result = this.evaluateSimpleExpression(expression.right);
+            result.value = -result.value;
+            return result;
+        } else if (expression instanceof BinaryOperation) {
+            //по идеи эта ветка необходима только если левый или правый операнд
+            //операции умножения/деления будет представлен в виде объекта класса
+            //Addition/Subtraction пример: 6 * (2 + 3) или (7 - 1) / 3
+            let result = this.evaluateSimpleExpression(expression);
+            return result;
         } else {
             return this.evaluateMultiplier(expression);
         }
@@ -83,16 +102,7 @@ export class Engine
         if (expression instanceof NumberConstant) 
         {
             return new NumberVariable(expression.symbol.value);
-        } else if (expression instanceof UnaryOperation)
-        {   
-            if (expression.right instanceof NumberConstant)
-            {
-                let result = expression.right.symbol.value;
-                return new NumberVariable(-result);
-            } else{
-                let result = this.evaluateSimpleExpression(expression.right);
-                return new NumberVariable(-result.value);
-            }
+
         } else{
             throw 'Number Constant expected.';
         }

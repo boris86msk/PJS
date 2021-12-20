@@ -5,6 +5,8 @@ import { Subtraction } from './Tree/Subtraction';
 import { NumberConstant } from './Tree/NumberConstant';
 import { SymbolsCodes } from '../LexicalAnalyzer/SymbolsCodes';
 import { UnaryOperation } from './Tree/UnaryOperation';
+import { Assingning } from './Tree/Assigning';
+import { Variable } from './Tree/Variable';
 /**
  * Синтаксический анализатор - отвечат за построения дерева выполнения
  */
@@ -37,7 +39,7 @@ export class SyntaxAnalyzer
         this.nextSym();
 
         while (this.symbol !== null) {
-            let expression = this.scanExpression();
+            let expression = this.scanAssigning();
             this.trees.push(expression);
 
             // Последняя строка может не заканчиваться переносом на следующую строку.
@@ -48,6 +50,18 @@ export class SyntaxAnalyzer
         }
 
         return this.tree;
+    }
+
+    scanAssigning()
+    {
+        let term = this.scanExpression();
+        if (this.symbol !== null && 
+            this.symbol.symbolCode === SymbolsCodes.equal)
+            {
+                this.nextSym();
+                term = new Assingning(term ,this.scanExpression());
+            }
+        return term;
     }
     
     scanExpression()
@@ -101,9 +115,11 @@ export class SyntaxAnalyzer
 
         return term;
     }
+
     
     scanMultiplier()
     {
+
         if(this.symbol.symbolCode === SymbolsCodes.minus)
         {
             this.nextSym();
@@ -122,6 +138,13 @@ export class SyntaxAnalyzer
         {
             let term = this.scanParentheses();
             return term;
+
+        } else if (this.symbol.symbolCode === SymbolsCodes.identifier)
+        {
+            let value = this.symbol.value;
+            this.nextSym();
+            return new Variable(value);
+   
         } else {
             let integerConstant = this.symbol;
 

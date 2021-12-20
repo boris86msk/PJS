@@ -5,6 +5,7 @@ export const SymbolsCodes = {
     slash: '/',
     openStap: '(',
     closeStap: ')',
+    equal: '=',
     identifier: 'ident',
     integerConst: 'int',
     endOfLine: 'eol',

@@ -52,7 +52,8 @@ export class LexicalAnalyzer //fileIO новый объект (строка пр
 
         } else if (/\w/i.exec(this.char) !== null) {
 
-            while (/\w/i.exec(this.char) !== null) {
+            while (/\w/i.exec(this.char) !== null &&
+                    this.char !== null) {
                 this.currentWord += this.char;
                 this.char = this.fileIO.nextCh();
             }

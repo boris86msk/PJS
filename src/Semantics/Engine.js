@@ -6,6 +6,8 @@ import { Division } from '../SyntaxAnalyzer/Tree/Division';
 import { UnaryOperation } from '../SyntaxAnalyzer/Tree/UnaryOperation';
 import { NumberConstant } from '../SyntaxAnalyzer/Tree/NumberConstant';
 import { NumberVariable } from './Variables/NumberVariable';
+import { Assingning } from '../SyntaxAnalyzer/Tree/Assigning';
+import { Variable } from '../SyntaxAnalyzer/Tree/Variable';
 
 export class Engine
 {
@@ -20,6 +22,7 @@ export class Engine
     {
         this.trees = trees;
         this.results = [];
+        this.savedVariables = new Map();
     }
 
     run()
@@ -30,12 +33,34 @@ export class Engine
 
             function(tree)
             {
-                let result = self.evaluateSimpleExpression(tree);
-                console.log(result.value);
-                self.results.push(result.value); // пишем в массив результатов
+                let result = self.evaluateAssigning(tree);
+                if (result instanceof NumberVariable) {
+                    console.log(result.value);
+                    self.results.push(result.value); // пишем в массив результатов
+                } else {
+                    console.log(result);
+                }
             }
         );
 
+    }
+
+    evaluateAssigning(expression)
+    {
+        if (expression instanceof Assingning) {
+            let leftOperand = null;
+            if (expression.left instanceof Variable) {
+                leftOperand = expression.left.value;
+            } else {
+                throw 'Variable is not defined.';
+            }
+            let rightOperand = this.evaluateSimpleExpression(expression.right);
+            this.savedVariables.set(leftOperand, rightOperand.value);
+            return `${leftOperand} = ${rightOperand.value}`;
+
+        } else {
+            return this.evaluateSimpleExpression(expression);
+        }
     }
 
     evaluateSimpleExpression(expression)
@@ -87,9 +112,6 @@ export class Engine
             result.value = -result.value;
             return result;
         } else if (expression instanceof BinaryOperation) {
-            //по идеи эта ветка необходима только если левый или правый операнд
-            //операции умножения/деления будет представлен в виде объекта класса
-            //Addition/Subtraction пример: 6 * (2 + 3) или (7 - 1) / 3
             let result = this.evaluateSimpleExpression(expression);
             return result;
         } else {
@@ -103,7 +125,16 @@ export class Engine
         {
             return new NumberVariable(expression.symbol.value);
 
-        } else{
+        } else if (expression instanceof Variable) {
+
+            let variable = this.savedVariables.get(expression.value);
+            if (variable !== undefined) {
+               return new NumberVariable(variable); 
+            } else {
+                throw 'variable is not defined'
+            }
+
+        } else {
             throw 'Number Constant expected.';
         }
     }

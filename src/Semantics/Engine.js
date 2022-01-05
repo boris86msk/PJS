@@ -48,12 +48,7 @@ export class Engine
     evaluateAssigning(expression)
     {
         if (expression instanceof Assingning) {
-            let leftOperand = null;
-            if (expression.left instanceof Variable) {
-                leftOperand = expression.left.value;
-            } else {
-                throw 'Variable is not defined.';
-            }
+            let leftOperand = expression.left.value;
             let rightOperand = this.evaluateSimpleExpression(expression.right);
             this.savedVariables.set(leftOperand, rightOperand.value);
             return `${leftOperand} = ${rightOperand.value}`;

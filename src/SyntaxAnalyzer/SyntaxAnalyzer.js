@@ -59,7 +59,12 @@ export class SyntaxAnalyzer
             this.symbol.symbolCode === SymbolsCodes.equal)
             {
                 this.nextSym();
-                term = new Assingning(term ,this.scanExpression());
+                if (term instanceof Variable) {
+                    term = new Assingning(term ,this.scanExpression());
+                } else {
+                    throw 'Variable is not defined.';
+                }
+                
             }
         return term;
     }
